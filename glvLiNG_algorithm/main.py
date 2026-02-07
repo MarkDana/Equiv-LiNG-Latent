@@ -21,8 +21,9 @@ def glvLiNG(A_tilde, hyperparams):
     :param hyperparams: to control for hyperparameters for determining full ranks.
 
     :return: Q, np.ndarray, shape (ldim+xdim, ldim+xdim), adjacency matrix of the maximal digraph.
-           the first ldim indices are latents, the last xdim indices are observables.
-           Q[Vi, Vj] == 1 if and only if Vj -> Vi is in the digraph.
+           the first ldim indices are latents (up to renaming);
+           the last xdim indices are observables (corresponding to the order of row indices of A_tilde).
+           Q[Vj, Vi] == 1 if and only if Vi -> Vj is in the digraph.
            this digraph corresponds to the maximal presentation of the equivalence subclass (Theorem 4).
            if you want to further get edge types in this presentation, or to traverse from this digraph to the whole equivalence class,
            you can run the corresponding parts in the equivalence_class_searcher/ .
@@ -118,6 +119,10 @@ if __name__ == '__main__':
         'cyclic-flats-combinator': avg,   # can choose from [harmonicAvg, avg, min, max, product, complementaryProduct]
         'empty-cyclic-flat-score': 1.0    # suggest to fix at 1.0
      }
+    # The returned Q_est is a binary adjacency matrix in square shape vdim*vdim, where vdim=ldim+xdim.
+    # The first ldim indices are latents (up to renaming);
+    # The last xdim indices are observables (corresponding to the order of row indices of A_tilde).
+    # Q[Vj, Vi] == 1 if and only if Vi -> Vj is in the digraph (column -> row).
     Q_est = glvLiNG(A_tilde, hyperparameters)
 
 
