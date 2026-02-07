@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Equivalence Class Searcher</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='glab.css') }}" />
+    <script id="MathJax-script"
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.24.0/cytoscape.min.js"></script>
+</head>
+
+<body>
+
+<!-- Header -->
+<div style="margin: 0 !important; padding: -10px !important;">
+<a href="{{ url_for('index') }}">
+    <div style="width: 100%; background: #8D0016; color:white; padding-top: 20px; padding-bottom: 40px;"
+         onmouseover="this.style.color='gray'" onmouseout="this.style.color='white'">
+        <h1>Equivalence Class Searcher</h1>
+        <p>as part of the</p>
+        <h2>“Distributional Equivalence in Linear Non-Gaussian Latent-Variable Cyclic Causal Models: Characterization and Learning”</h2>
+        <h2>Haoyue Dai, Immanuel Albrecht, Peter Spirtes, Kun Zhang</h2>
+        <h2>Appears at ICLR 2026 <i>(Oral Presentation)</i></h2>
+    </div>
+</a></div>
+
+<!-- Main Content -->
+<div id="primarycontent" style="max-width: 1200px; margin: 40px auto;">
+
+    <div style="font-size: 16pt; margin-bottom: 10px;">
+        The <strong>CPDAG-like representation</strong> of this distributional equivalence class is as follows:
+    </div>
+
+    <div class="svg-grid">
+    <!-- SVG -->
+    <div class="svg-container">
+        <object data="{{ representation_svg_path }}" type="image/svg+xml"></object>
+    </div>
+
+    <!-- Explanation -->
+    <div class="cpdag-explain">
+        <div class="cpdag-explain-title">Explanation</div>
+        <ul class="cpdag-explain-list">
+            <li>The whole equivalence class can be partitioned into <b>subclasses</b>, where each subclass consists of digraphs mutually reachable via sequences of admissible edge additions and deletions, but without cycle reversals.</li>
+            <li>The left panel shows the <b>maximally inclusive digraph</b> of a subclass.</li>
+            <li><b>Solid edges</b> appear in all digraphs within the subclass.</li>
+            <li><b>Dashed edges</b> appear in some but not all digraphs within the subclass.</li>
+            <li>Such representations of different subclasses are connected by simple cycle reversals, with edge types carried along.</li>
+            <li>Further details are provided in Appendix&nbsp;C.3 of the paper.</li>
+        </ul>
+    </div>
+    </div>
+
+
+
+
+
+    <div style="font-size: 16pt; margin-bottom: 20px; margin-top: 50px;">
+        There are <strong>{{ n_L_noniso_graphs }}</strong> irreducible digraphs (unique up to L-labeling) in this distributional equivalence class.
+        {% if n_dags == 0 %}
+            <strong>None</strong> of them are acyclic.
+        {% elif n_dags == n_L_noniso_graphs %}
+            <strong>All</strong> of them are acyclic.
+        {% else %}
+            <strong>{{ n_dags }}</strong> of them are acyclic.
+        {% endif %}
+    </div>
+
+    {% for section in edge_sections %}
+        <hr>
+        <details>
+            <summary style="font-size: 14pt; margin-bottom: 20px; margin-top: 20px; cursor: pointer;">
+                There are <strong>{{ section.n_graphs }}</strong> digraphs with <strong>{{ section.edge_count }}</strong> edges.
+                {% if section.n_first_dags == 0 %}
+                    <strong>None</strong> of them are acyclic.
+                {% elif section.n_first_dags == section.n_graphs %}
+                    <strong>All</strong> of them are acyclic.
+                {% else %}
+                    The first <strong>{{ section.n_first_dags }}</strong> of them are acyclic.
+                {% endif %}
+                <span style="color: gray; font-size: 12pt;">(click to expand)</span>
+            </summary>
+
+            {% set total = section.svg_paths|length %}
+            {% set page_size = 10 %}
+            {% set total_pages = (total // page_size) + (1 if total % page_size > 0 else 0) %}
+
+            <div id="section-{{ loop.index }}" class="paginated-section">
+                {% for page in range(1, total_pages + 1) %}
+                    <div class="svg-grid page-{{ page }}" style="display: {% if page == 1 %}flex{% else %}none{% endif %};">
+                        {% for svg in section.svg_paths[(page - 1) * page_size : page * page_size] %}
+                            <div class="svg-container">
+                                <object data="{{ svg }}" type="image/svg+xml"></object>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+
+                <div class="pagination-controls">
+                    <button class="prev-btn" onclick="changePage({{ loop.index }}, -1)">◀ Prev</button>
+                    <span class="page-info" id="page-info-{{ loop.index }}"
+                          data-total="{{ total }}"
+                          data-page-size="{{ page_size }}">
+                          Page 1 of {{ total_pages }} (Digraphs 1 to {{ [page_size, total]|min }} of {{ total }})
+                    </span>
+                    <button class="next-btn" onclick="changePage({{ loop.index }}, 1)">Next ▶</button>
+                </div>
+            </div>
+        </details>
+    {% endfor %}
+
+    <div style="font-size: 12pt; color: gray; margin-top: 100px; margin-bottom: 10px; text-align: center;">
+        &dash;&dash; Refresh this page to view another example &dash;&dash;
+    </div>
+
+</div>
+
+<!-- CSS -->
+<style>
+
+
+    .cpdag-explain {
+        background-color: white;
+        border: 1px solid #ddd;
+        padding: 12px 14px;
+        max-width: 560px;
+        font-size: 12pt;
+        color: #444;
+        line-height: 1.5;
+        margin-left: 20pt;
+    }
+
+    .cpdag-explain-title {
+        font-size: 13pt;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .cpdag-explain-list {
+        margin: 0;
+        padding-left: 18px;
+    }
+
+    .cpdag-explain-list li {
+        margin-bottom: 6px;
+    }
+
+
+    .svg-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin-top: 20px;
+    }
+    .svg-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: white;
+        padding: 8px;
+        border: 1px solid #ddd;
+    }
+    .pagination-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin-top: 20px;
+        margin-bottom: 30px;
+        font-size: 13pt;
+    }
+    .pagination-controls button {
+    padding: 6px 16px;
+    font-size: 12pt;
+    border: none;
+    border-radius: 6px;
+    background-color: #8D0016;
+    color: white;
+    cursor: pointer;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+    .pagination-controls button:hover {
+    background-color: #a5172a;
+    transform: translateY(-1px);
+}
+    #primarycontent strong {
+        color: darkred;
+    }
+</style>
+
+<!-- JS -->
+<script>
+function changePage(sectionIndex, delta) {
+    const section = document.getElementById(`section-${sectionIndex}`);
+    const pages = section.querySelectorAll(`.svg-grid`);
+    const pageInfo = section.querySelector(`#page-info-${sectionIndex}`);
+
+    let currentPage = 0;
+    pages.forEach((p, i) => {
+        if (p.style.display !== "none") currentPage = i;
+        p.style.display = "none";
+    });
+
+    let newPage = currentPage + delta;
+    newPage = Math.max(0, Math.min(newPage, pages.length - 1));
+    pages[newPage].style.display = "flex";
+
+    const total = parseInt(pageInfo.dataset.total);
+    const pageSize = parseInt(pageInfo.dataset.pageSize);
+    const from = newPage * pageSize + 1;
+    const to = Math.min((newPage + 1) * pageSize, total);
+    const totalPages = pages.length;
+
+    pageInfo.innerHTML = `Page ${newPage + 1} of ${totalPages} (Digraphs ${from} to ${to} of ${total})`;
+}
+</script>
+
+</body>
+</html>

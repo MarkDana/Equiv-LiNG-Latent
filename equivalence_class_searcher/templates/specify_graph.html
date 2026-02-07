@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Equivalence Class Searcher</title>
+    <link rel="stylesheet" type="text/css" media="all" href="{{ url_for('static', filename='glab.css') }}" />
+    <script type="text/javascript" id="MathJax-script"
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.24.0/cytoscape.min.js"></script>
+</head>
+
+<body>
+
+<div style="margin: 0 !important; padding: -10px !important;">
+<a href="{{ url_for('index') }}">
+    <div style="width: 100%; background: #8D0016; color:white; padding-top: 20px; padding-bottom: 40px;"
+         onmouseover="this.style.color='gray'" onmouseout="this.style.color='white'">
+        <h1>Equivalence Class Searcher</h1>
+        <p>as part of the</p>
+        <h2>“Distributional Equivalence in Linear Non-Gaussian Latent-Variable Cyclic Causal Models: Characterization and Learning”</h2>
+        <h2>Haoyue Dai, Immanuel Albrecht, Peter Spirtes, Kun Zhang</h2>
+        <h2>Appears at ICLR 2026 <i>(Oral Presentation)</i></h2>
+    </div>
+</a></div>
+
+<div id="primarycontent">
+    {% if specify_message %}
+        <div style="text-align: left; margin-left: 160px; color: darkred; font-weight: bold;">
+            <p>{{ specify_message }}</p>
+        </div>
+    {% endif %}
+
+    <!-- Loader -->
+    <div id="loader" style="display:none; text-align:center; margin-top:20px; font-size: 18pt; color: #444;">
+        ⏳ Processing... please wait
+    </div>
+
+    <div style="text-align: left; margin-left: 160px; margin-top:40px; font-size: 16pt; min-width: 500px; max-width: 500px">
+
+        <form id="specify" action="{{ url_for('specify_graph') }}" method="post" enctype="multipart/form-data" onsubmit="showLoader()">
+
+            <label for="numnodes">&bull; There are </label>
+            <select name="numnodes" id="numnodes" onchange="updateLatentOptions(); updateNodeString();">
+                {% for i in range(3, 11) %}
+                  <option value="{{ i }}" {% if i == 5 %}selected{% endif %}>{{ i }}</option>
+                {% endfor %}
+            </select> variables in total;
+
+            <br><br>
+            &bull; Among them,
+            <select name="n_latents" id="n_latents" onchange="updateNodeString();"></select> are latent variables.
+
+            <br><br>
+            &bull; The respective variables are:
+            <div style="display: inline-block" id="X_n_value"></div>.
+
+            <br><br>
+            &bull; The direct edges are:<br>&nbsp;&nbsp; (one line for one edge, follow the format)
+            <textarea class="longInput" cols="30" rows="10" id="diedges" name="diedges"
+                      style="margin-left: 15px; margin-top: 10px; font-size: 15pt; padding-left: 10px; padding-top: 10px;
+                             font-family: Droid Sans Mono, monospace;"
+                      required
+                      placeholder="L1 --> X1
+X1 --> X2"></textarea>
+
+            <br><br>
+
+            <div style="text-align: center" onmouseover="this.style.color='gray'" onmouseout="this.style.color='white'">
+                <button type="submit" onmouseover="this.style.color='gray'" onmouseout="this.style.color='white'">Proceed</button>
+            </div>
+        </form>
+
+        <script>
+            function updateLatentOptions() {
+                let numnodes = parseInt(document.getElementById("numnodes").value);
+                let n_latents = document.getElementById("n_latents");
+                n_latents.innerHTML = "";
+                for (let i = 0; i <= Math.max(numnodes - 2, 0); i++) {
+                    let opt = document.createElement("option");
+                    opt.value = i;
+                    opt.text = i;
+                    n_latents.add(opt);
+                }
+                n_latents.value = Math.min(2, Math.max(numnodes - 2, 0));
+            }
+
+            function updateNodeString() {
+                let total = parseInt(document.getElementById("numnodes").value);
+                let n_latent = parseInt(document.getElementById("n_latents").value);
+                let obs = total - n_latent;
+
+                let latent_vars = Array.from({ length: n_latent }, (_, i) => `L_{${i + 1}}`);
+                let obs_vars = Array.from({ length: obs }, (_, i) => `X_{${i + 1}}`);
+
+                let math = "\\(" + [...latent_vars, ...obs_vars].join(", ") + "\\)";
+                document.getElementById("X_n_value").innerHTML = math;
+                MathJax.typeset();
+            }
+
+            function showLoader() {
+                document.getElementById("loader").style.display = 'block';
+            }
+
+            window.onload = function () {
+                updateLatentOptions();
+                updateNodeString();
+            };
+        </script>
+    </div>
+</div>
+
+</body>
+</html>

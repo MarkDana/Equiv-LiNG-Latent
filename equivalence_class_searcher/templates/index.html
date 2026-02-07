@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Equivalence Class Searcher</title>
+    <link rel="stylesheet" type="text/css" media="all" href="{{ url_for('static', filename='glab.css') }}" />
+    <script type="text/javascript" id="MathJax-script"
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+        // src="{{ url_for('static', filename='mathjax3-tex-chtml.js') }}">
+        // https://polyfill.io/v3/polyfill.min.js?features=es6
+        // https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js
+    </script>
+</head>
+
+<body>
+
+<div style="margin: 0 !important; padding: -10px !important;">
+<a href="{{ url_for('index') }}">
+    <div style="width: 100%; background: #8D0016; color:white; padding-top: 20px; padding-bottom: 40px; "  onmouseover="this.style.color='gray'" onmouseout="this.style.color='white'">
+        <h1>Equivalence Class Searcher</h1>
+        <p>as part of the</p>
+        <h2>“Distributional Equivalence in Linear Non-Gaussian Latent-Variable Cyclic Causal Models: Characterization and Learning”</h2>
+        <h2>Haoyue Dai, Immanuel Albrecht, Peter Spirtes, Kun Zhang</h2>
+        <h2>Appears at ICLR 2026 <i>(Oral Presentation)</i></h2>
+    </div>
+</a>
+</div>
+
+<div id="primarycontent">
+
+    <center>
+        <br><br><br><br>
+    <a href="{{ url_for('random_one') }}">
+        <div class="landing_select" onmouseover="this.style.color='gray'" onmouseout="this.style.color='white'">
+            Check a random equivalence class
+        </div>
+    </a> <br> <p>--- or --- </p>
+    <a href="{{ url_for('specify_graph') }}">
+        <div class="landing_select"
+             onmouseover="this.style.color='gray'" onmouseout="this.style.color='white'">
+            Search from your own specified graph
+        </div>
+    </a>
+    </center>
+</div>
+
+<br><br><br><br><br><br><br><br><br>
+    <p><a href="https://github.com/MarkDana/Equiv-LiNG-Latent" onmouseover="this.style.color='gray'"
+     onmouseout="this.style.color='#8D0016'" style="color: #8D0016;">[click to download code]</a></p>
+</body>
+</html>

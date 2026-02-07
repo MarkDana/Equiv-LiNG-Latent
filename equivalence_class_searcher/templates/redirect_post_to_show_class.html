@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="refresh" content="0;URL=''" />
+</head>
+<body>
+    <form id="redirectForm" action="{{ url_for('show_specified_class') }}" method="POST" style="display: none;">
+        <input type="hidden" name="session_id" value="{{ session_id }}">
+    </form>
+    <script>
+        document.getElementById('redirectForm').submit();
+    </script>
+</body>
+</html>
